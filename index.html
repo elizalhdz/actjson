@@ -34,7 +34,7 @@
     </div>
 
     <script>
-        // Elementos del DOM
+        
         const fileInput = document.getElementById('fileInput');
         const fileInfo = document.getElementById('fileInfo');
         const showJsonBtn = document.getElementById('showJsonBtn');
@@ -45,7 +45,7 @@
 
         let jsonData = null;
 
-        // Eventos
+
         fileInput.addEventListener('change', handleFileSelect);
         showJsonBtn.addEventListener('click', showJson);
         showTableBtn.addEventListener('click', showTable);
@@ -130,7 +130,7 @@
             const thead = document.createElement('thead');
             const tbody = document.createElement('tbody');
             
-            // Obtener todas las claves
+            
             const allKeys = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i]) {
@@ -143,7 +143,6 @@
                 }
             }
             
-            // Crear encabezados
             const headerRow = document.createElement('tr');
             for (let i = 0; i < allKeys.length; i++) {
                 const th = document.createElement('th');
@@ -153,7 +152,6 @@
             thead.appendChild(headerRow);
             table.appendChild(thead);
             
-            // Crear filas
             for (let i = 0; i < data.length; i++) {
                 const row = document.createElement('tr');
                 
@@ -185,7 +183,7 @@
             const thead = document.createElement('thead');
             const tbody = document.createElement('tbody');
             
-            // Encabezado simple
+
             const headerRow = document.createElement('tr');
             const th = document.createElement('th');
             th.textContent = 'Valor';
@@ -193,7 +191,7 @@
             thead.appendChild(headerRow);
             table.appendChild(thead);
             
-            // Filas
+
             for (let i = 0; i < data.length; i++) {
                 const row = document.createElement('tr');
                 const cell = document.createElement('td');
@@ -215,13 +213,13 @@
             for (let i = 0; i < keys.length; i++) {
                 const row = document.createElement('tr');
                 
-                // Celda de clave
+                
                 const keyCell = document.createElement('td');
                 keyCell.textContent = keys[i];
                 keyCell.style.fontWeight = 'bold';
                 row.appendChild(keyCell);
                 
-                // Celda de valor
+                
                 const valueCell = document.createElement('td');
                 const value = data[keys[i]];
                 if (typeof value === 'object') {
@@ -272,4 +270,5 @@
         }
     </script>
 </body>
+
 </html>
