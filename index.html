@@ -80,7 +80,6 @@
 
         function showTable() {
             if (!jsonData) return;
-            
             try {
                 const table = createTable(jsonData);
                 tableContainer.innerHTML = '';
@@ -92,7 +91,6 @@
         }
 
         function createTable(data) {
-            // Si es un array
             if (Array.isArray(data)) {
                 if (data.length === 0) {
                     const div = document.createElement('div');
@@ -100,7 +98,6 @@
                     return div;
                 }
                 
-                // Verificar si es array de objetos
                 let isObjectArray = true;
                 for (let i = 0; i < data.length; i++) {
                     if (typeof data[i] !== 'object' || data[i] === null) {
@@ -119,7 +116,7 @@
             else if (typeof data === 'object' && data !== null) {
                 return createObjectTable(data);
             }
-            // Si es un valor simple
+            
             else {
                 return createSimpleValueTable(data);
             }
@@ -129,7 +126,6 @@
             const table = document.createElement('table');
             const thead = document.createElement('thead');
             const tbody = document.createElement('tbody');
-            
             
             const allKeys = [];
             for (let i = 0; i < data.length; i++) {
@@ -272,3 +268,4 @@
 </body>
 
 </html>
+
