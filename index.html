@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cargador JSON </title>
+    <link rel="stylesheet" href="style.css"></linkrel>
+</head>
+<body>
+    <h1>Cargador JSON</h1>
+    
+    <div class="section">
+        <input type="file" id="fileInput" accept=".json">
+        <div id="fileInfo" class="info">No hay archivo seleccionado</div>
+    </div>
+
+    <div class="section">
+        <button id="showJsonBtn" disabled>Mostrar JSON</button>
+        <button id="showTableBtn" disabled>Mostrar Tabla</button>
+    </div>
+
+    <div id="errorMessage" class="error" style="display: none;"></div>
+
+    <div class="section">
+        <h3>Contenido JSON:</h3>
+        <pre id="jsonDisplay">- No hay contenido -</pre>
+    </div>
+
+    <div class="section">
+        <h3>Tabla:</h3>
+        <div id="tableContainer">
+            - No hay tabla -
+        </div>
+    </div>
+
+    <script>
+        // Elementos del DOM
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const showJsonBtn = document.getElementById('showJsonBtn');
+        const showTableBtn = document.getElementById('showTableBtn');
+        const jsonDisplay = document.getElementById('jsonDisplay');
+        const tableContainer = document.getElementById('tableContainer');
+        const errorMessage = document.getElementById('errorMessage');
+
+        let jsonData = null;
+
+        // Eventos
+        fileInput.addEventListener('change', handleFileSelect);
+        showJsonBtn.addEventListener('click', showJson);
+        showTableBtn.addEventListener('click', showTable);
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            fileInfo.textContent = `Archivo: ${file.name}`;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    jsonData = JSON.parse(e.target.result);
+                    enableButtons();
+                    hideError();
+                } catch (error) {
+                    showError('Error: El archivo no es un JSON válido');
+                    disableButtons();
+                }
+            };
+            reader.onerror = function() {
+                showError('Error al leer el archivo');
+            };
+            reader.readAsText(file);
+        }
+
+        function showJson() {
+            if (!jsonData) return;
+            jsonDisplay.textContent = JSON.stringify(jsonData, null, 2);
+        }
+
+        function showTable() {
+            if (!jsonData) return;
+            
+            try {
+                const table = createTable(jsonData);
+                tableContainer.innerHTML = '';
+                tableContainer.appendChild(table);
+                hideError();
+            } catch (error) {
+                showError('Error al crear la tabla: ' + error.message);
+            }
+        }
+
+        function createTable(data) {
+            // Si es un array
+            if (Array.isArray(data)) {
+                if (data.length === 0) {
+                    const div = document.createElement('div');
+                    div.textContent = 'El array está vacío';
+                    return div;
+                }
+                
+                // Verificar si es array de objetos
+                let isObjectArray = true;
+                for (let i = 0; i < data.length; i++) {
+                    if (typeof data[i] !== 'object' || data[i] === null) {
+                        isObjectArray = false;
+                        break;
+                    }
+                }
+                
+                if (isObjectArray) {
+                    return createObjectArrayTable(data);
+                } else {
+                    return createSimpleArrayTable(data);
+                }
+            }
+            // Si es un objeto
+            else if (typeof data === 'object' && data !== null) {
+                return createObjectTable(data);
+            }
+            // Si es un valor simple
+            else {
+                return createSimpleValueTable(data);
+            }
+        }
+
+        function createObjectArrayTable(data) {
+            const table = document.createElement('table');
+            const thead = document.createElement('thead');
+            const tbody = document.createElement('tbody');
+            
+            // Obtener todas las claves
+            const allKeys = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i]) {
+                    const keys = Object.keys(data[i]);
+                    for (let j = 0; j < keys.length; j++) {
+                        if (!allKeys.includes(keys[j])) {
+                            allKeys.push(keys[j]);
+                        }
+                    }
+                }
+            }
+            
+            // Crear encabezados
+            const headerRow = document.createElement('tr');
+            for (let i = 0; i < allKeys.length; i++) {
+                const th = document.createElement('th');
+                th.textContent = allKeys[i];
+                headerRow.appendChild(th);
+            }
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+            
+            // Crear filas
+            for (let i = 0; i < data.length; i++) {
+                const row = document.createElement('tr');
+                
+                for (let j = 0; j < allKeys.length; j++) {
+                    const cell = document.createElement('td');
+                    const value = data[i] ? data[i][allKeys[j]] : undefined;
+                    
+                    if (value === undefined || value === null) {
+                        cell.textContent = '-';
+                        cell.style.color = '#999';
+                    } else if (typeof value === 'object') {
+                        cell.textContent = JSON.stringify(value);
+                    } else {
+                        cell.textContent = value;
+                    }
+                    
+                    row.appendChild(cell);
+                }
+                
+                tbody.appendChild(row);
+            }
+            
+            table.appendChild(tbody);
+            return table;
+        }
+
+        function createSimpleArrayTable(data) {
+            const table = document.createElement('table');
+            const thead = document.createElement('thead');
+            const tbody = document.createElement('tbody');
+            
+            // Encabezado simple
+            const headerRow = document.createElement('tr');
+            const th = document.createElement('th');
+            th.textContent = 'Valor';
+            headerRow.appendChild(th);
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+            
+            // Filas
+            for (let i = 0; i < data.length; i++) {
+                const row = document.createElement('tr');
+                const cell = document.createElement('td');
+                cell.textContent = data[i];
+                row.appendChild(cell);
+                tbody.appendChild(row);
+            }
+            
+            table.appendChild(tbody);
+            return table;
+        }
+
+        function createObjectTable(data) {
+            const table = document.createElement('table');
+            const tbody = document.createElement('tbody');
+            
+            const keys = Object.keys(data);
+            
+            for (let i = 0; i < keys.length; i++) {
+                const row = document.createElement('tr');
+                
+                // Celda de clave
+                const keyCell = document.createElement('td');
+                keyCell.textContent = keys[i];
+                keyCell.style.fontWeight = 'bold';
+                row.appendChild(keyCell);
+                
+                // Celda de valor
+                const valueCell = document.createElement('td');
+                const value = data[keys[i]];
+                if (typeof value === 'object') {
+                    valueCell.textContent = JSON.stringify(value);
+                } else {
+                    valueCell.textContent = value;
+                }
+                row.appendChild(valueCell);
+                
+                tbody.appendChild(row);
+            }
+            
+            table.appendChild(tbody);
+            return table;
+        }
+
+        function createSimpleValueTable(data) {
+            const table = document.createElement('table');
+            const tbody = document.createElement('tbody');
+            const row = document.createElement('tr');
+            const cell = document.createElement('td');
+            
+            cell.textContent = String(data);
+            row.appendChild(cell);
+            tbody.appendChild(row);
+            table.appendChild(tbody);
+            
+            return table;
+        }
+
+        function enableButtons() {
+            showJsonBtn.disabled = false;
+            showTableBtn.disabled = false;
+        }
+
+        function disableButtons() {
+            showJsonBtn.disabled = true;
+            showTableBtn.disabled = true;
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+        }
+
+        function hideError() {
+            errorMessage.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
